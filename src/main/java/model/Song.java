@@ -6,8 +6,6 @@ public class Song {
     private String artist;
     private String filePath;
 
-
-    // Update constructor, getters, and setters
     public Song(Long id, String title, String artist, String filePath) {
         this.id = id;
         this.title = title;
@@ -15,7 +13,9 @@ public class Song {
         this.filePath = filePath;
     }
 
-    // Getters and setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
 
@@ -38,8 +38,6 @@ public class Song {
         String nameWithoutExtension = fileName.substring(0, fileName.lastIndexOf("."));
         return folder + "/" + nameWithoutExtension + extension;
     }
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
 
     @Override
     public String toString() {

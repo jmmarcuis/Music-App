@@ -4,22 +4,25 @@ package persistence;
 import javax.persistence.*;
 import java.util.List;
 
+import model.Song;
+
+import javax.persistence.*;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class SongRepository {
     private EntityManagerFactory emf;
-    private EntityManager em;
 
     public SongRepository() {
         emf = Persistence.createEntityManagerFactory("musicPlayerPU");
-        em = emf.createEntityManager();
     }
 
-
-    public void addSong(String title, String artist, String filePath) {
+    public void addSong(Song song) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            SongEntity entity = new SongEntity(title, artist, filePath);
+            SongEntity entity = convertToEntity(song);
             em.persist(entity);
             tx.commit();
         } catch (Exception e) {
@@ -32,31 +35,47 @@ public class SongRepository {
         }
     }
 
-
-    public SongEntity getSongById(Long id) {
-        return em.find(SongEntity.class, id);
+    public Song getSongById(Long id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            SongEntity entity = em.find(SongEntity.class, id);
+            return entity != null ? convertToSong(entity) : null;
+        } finally {
+            em.close();
+        }
     }
 
-    public List<SongEntity> getAllSongs() {
-        TypedQuery<SongEntity> query = em.createQuery("SELECT s FROM SongEntity s", SongEntity.class);
-        return query.getResultList();
+    public List<Song> getAllSongs() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<SongEntity> query = em.createQuery("SELECT s FROM SongEntity s", SongEntity.class);
+            List<SongEntity> entities = query.getResultList();
+            return entities.stream().map(this::convertToSong).collect(Collectors.toList());
+        } finally {
+            em.close();
+        }
     }
 
-    public void updateSong(SongEntity song) {
+    public void updateSong(Song song) {
+        EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            em.merge(song);
+            SongEntity entity = convertToEntity(song);
+            em.merge(entity);
             tx.commit();
         } catch (Exception e) {
             if (tx != null && tx.isActive()) {
                 tx.rollback();
             }
             throw e;
+        } finally {
+            em.close();
         }
     }
 
     public void deleteSong(Long id) {
+        EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -70,11 +89,27 @@ public class SongRepository {
                 tx.rollback();
             }
             throw e;
+        } finally {
+            em.close();
         }
     }
 
+    private Song convertToSong(SongEntity entity) {
+        return new Song(entity.getId(), entity.getTitle(), entity.getArtist(), entity.getFilePath());
+    }
+
+    private SongEntity convertToEntity(Song song) {
+        SongEntity entity = new SongEntity();
+        entity.setId(song.getId());
+        entity.setTitle(song.getTitle());
+        entity.setArtist(song.getArtist());
+        entity.setFilePath(song.getFilePath());
+        return entity;
+    }
+
     public void close() {
-        em.close();
-        emf.close();
+        if (emf != null && emf.isOpen()) {
+            emf.close();
+        }
     }
 }

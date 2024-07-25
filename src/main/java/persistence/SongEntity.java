@@ -1,5 +1,6 @@
 package persistence;
 
+
 import javax.persistence.*;
 
 @Entity
@@ -9,24 +10,20 @@ public class SongEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title", nullable = false)
+    @Column(nullable = false)
     private String title;
 
-    @Column(name = "artist", nullable = false)
+    @Column(nullable = false)
     private String artist;
 
     @Column(name = "file_path", nullable = false)
     private String filePath;
 
-    @Column(name = "lyrics_path", nullable = false)
-    private String lyricsPath;
-
-    @Column(name = "image_path", nullable = false)
-    private String imagePath;
-
     // Constructors, getters, and setters
 
-    public SongEntity(String title, String artist, String filePath) {}
+    public SongEntity() {}
+
+
 
     public SongEntity(String title, String artist, String filePath, String lyricsPath, String imagePath) {
         this.title = title;

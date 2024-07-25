@@ -1,10 +1,7 @@
-import model.MusicLibrary;
+import controller.MusicPlayerController;
 import model.AudioPlayer;
 import model.LyricsManager;
-
-import controller.MusicPlayerController;
-
-import persistence.SongRepository;
+import model.MusicLibrary;
 import view.MusicPlayerView;
 
 public class MusicPlayerApp {
@@ -16,8 +13,6 @@ public class MusicPlayerApp {
         MusicPlayerController controller = new MusicPlayerController(library, player, lyricsManager, view);
         view.setVisible(true);
 
-        SongRepository repo = new SongRepository();
-        repo.addSong("Let Down", "Radiohead", "music/Let Down.mp3");
 
     }
 }

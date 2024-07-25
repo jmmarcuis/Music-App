@@ -2,42 +2,40 @@ package model;
 
 import persistence.SongEntity;
 import persistence.SongRepository;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MusicLibrary {
     private List<Song> songs;
     private SongRepository repository;
 
-    public MusicLibrary() {
-        songs = new ArrayList<>();
-        repository = new SongRepository(); // Initialize the repository
+    public MusicLibrary(SongRepository repository) {
+        this.repository = repository;
+        this.songs = new ArrayList<>();
+        loadSongs();
+    }
 
-        // Add some sample songs
-        songs.add(new Song(1L, "Let Down", "Radiohead", "music/Let Down.mp3"));
-        songs.add(new Song(2L, "Another Song", "Another Artist", "music/Another Song.mp3"));
-        // Add more songs as needed
+    private void loadSongs() {
+        songs = repository.getAllSongs();
     }
 
     public void addSong(Song song) {
-        SongEntity entity = convertToEntity(song);
-        repository.addSong(entity.getTitle(), entity.getArtist(), entity.getFilePath());
+        repository.addSong(song);
+        songs.add(song);
     }
 
     public void removeSong(Song song) {
         repository.deleteSong(song.getId());
+        songs.removeIf(s -> s.getId().equals(song.getId()));
     }
 
     public List<Song> getAllSongs() {
-        List<SongEntity> entities = repository.getAllSongs();
-        return entities.stream()
-                .map(this::convertToSong)
-                .collect(Collectors.toList());
+        return new ArrayList<>(songs);
     }
 
     public Song getSongByTitle(String title) {
-        return getAllSongs().stream()
+        return songs.stream()
                 .filter(song -> song.getTitle().equalsIgnoreCase(title))
                 .findFirst()
                 .orElse(null);

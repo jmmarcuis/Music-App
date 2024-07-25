@@ -57,6 +57,9 @@ public class MusicPlayerView extends JFrame {
         // Now playing label
         nowPlayingLabel = new JLabel("No song playing");
         add(nowPlayingLabel, BorderLayout.NORTH);
+
+        imageLabel = new JLabel();
+        imageLabel.setPreferredSize(new Dimension(200, 200));
     }
 
     public void updateSongList(List<Song> songs) {
