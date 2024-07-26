@@ -5,12 +5,16 @@ public class Song {
     private String title;
     private String artist;
     private String filePath;
+    private String lyricsPath;
+    private String imagePath;
 
-    public Song(Long id, String title, String artist, String filePath) {
+    public Song(Long id, String title, String artist, String filePath, String lyricsPath, String imagePath) {
         this.id = id;
         this.title = title;
         this.artist = artist;
         this.filePath = filePath;
+        this.lyricsPath = lyricsPath;
+        this.imagePath = imagePath;
     }
 
     public Long getId() { return id; }
@@ -25,19 +29,11 @@ public class Song {
     public String getFilePath() { return filePath; }
     public void setFilePath(String filePath) { this.filePath = filePath; }
 
-    public String getLyricsPath() {
-        return getResourcePath("lyrics", ".txt");
-    }
+    public String getLyricsPath() { return lyricsPath; }
+    public void setLyricsPath(String lyricsPath) { this.lyricsPath = lyricsPath; }
 
-    public String getImagePath() {
-        return getResourcePath("images", ".jpg");
-    }
-
-    private String getResourcePath(String folder, String extension) {
-        String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
-        String nameWithoutExtension = fileName.substring(0, fileName.lastIndexOf("."));
-        return folder + "/" + nameWithoutExtension + extension;
-    }
+    public String getImagePath() { return imagePath; }
+    public void setImagePath(String imagePath) { this.imagePath = imagePath; }
 
     @Override
     public String toString() {

@@ -16,10 +16,8 @@ public class VolumeChangeListener implements ChangeListener {
 
     @Override
     public void stateChanged(ChangeEvent e) {
-        JSlider source = (JSlider) e.getSource();
-        if (!source.getValueIsAdjusting()) {
-            int volume = source.getValue();
-            controller.setVolume(volume);
-        }
+        JSlider slider = (JSlider) e.getSource();
+        int volume = slider.getValue();
+        controller.setVolume(volume);
     }
 }

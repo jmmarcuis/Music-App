@@ -3,6 +3,7 @@ package controller;
 import event.PlaybackControlListener;
 import event.SongSelectionListener;
 import event.VolumeChangeListener;
+import javazoom.jl.decoder.JavaLayerException;
 import model.AudioPlayer;
 import model.LyricsManager;
 import model.MusicLibrary;
@@ -11,15 +12,18 @@ import view.MusicPlayerView;
 
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.swing.*;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 public class MusicPlayerController {
-    private MusicLibrary library;
-    private AudioPlayer player;
-    private LyricsManager lyricsManager;
-    private MusicPlayerView view;
+    private final MusicLibrary library;
+    private final AudioPlayer player;
+    private final LyricsManager lyricsManager;
+    private final MusicPlayerView view;
     private Song currentSong;
+    private boolean wasPaused = false;
 
     public MusicPlayerController(MusicLibrary library, AudioPlayer player, LyricsManager lyricsManager, MusicPlayerView view) {
         this.library = library;
@@ -29,6 +33,7 @@ public class MusicPlayerController {
 
         initializeSongList();
         setupEventListeners();
+        setupPlaybackListener();
     }
 
     private void initializeSongList() {
@@ -44,67 +49,99 @@ public class MusicPlayerController {
         view.setVolumeSliderListener(new VolumeChangeListener(this));
     }
 
+    private void setupPlaybackListener() {
+        player.setAudioPlayerListener(() -> SwingUtilities.invokeLater(() -> {
+            view.updateProgressBar(0);
+            view.updateNowPlaying("No song playing");
+            currentSong = null;
+            wasPaused = false;
+        }));
+    }
+
     public void handleSongSelection(String selectedSong) {
         currentSong = library.getSongByTitle(selectedSong);
         if (currentSong != null) {
             try {
-                // Load and play the audio
                 player.loadSong(currentSong.getFilePath());
                 player.play();
-
-                // Update lyrics
-                String lyrics = lyricsManager.getLyrics(currentSong);
-                view.updateLyrics(lyrics);
-
-                // Update image
-                view.updateImage(currentSong.getImagePath());
-
-                // Update now playing info
-                view.updateNowPlaying(currentSong.getTitle());
-            } catch (Exception ex) {
+                updateUI();
+                String imageName = new File(currentSong.getImagePath()).getName();
+                view.updateImage(imageName);
+                wasPaused = false;
+            } catch (IOException | UnsupportedAudioFileException | LineUnavailableException | JavaLayerException ex) {
                 view.showError("Error playing song: " + ex.getMessage());
             }
         }
     }
+
     public void handlePlayButton() {
         if (currentSong != null) {
-            if (player.isPaused()) {
-                player.play();
+            if (wasPaused) {
+                player.resume();
+                wasPaused = false;
             } else if (!player.isPlaying()) {
-                try {
-                    player.loadSong(currentSong.getFilePath());
-                    player.play();
-                } catch (UnsupportedAudioFileException | IOException | LineUnavailableException ex) {
-                    view.showError("Error playing song: " + ex.getMessage());
-                }
+                player.play();
             }
+            updateUI();
         }
     }
 
     public void handlePauseButton() {
         if (player.isPlaying()) {
             player.pause();
+            wasPaused = true;
         }
     }
 
     public void handleStopButton() {
         player.stop();
         view.updateNowPlaying("No song playing");
+        view.updateProgressBar(0);
+        currentSong = null;
+        wasPaused = false;
     }
 
     public void setVolume(int volume) {
         float normalizedVolume = (float) volume / 100;
         player.setVolume(normalizedVolume);
+        // Update the slider's value in the view
+        view.updateVolumeSlider(volume);
+    }
+
+    private void updateUI() {
+        try {
+            view.updateNowPlaying(currentSong.getTitle());
+            view.updateLyrics(lyricsManager.getLyrics(currentSong));
+            updateProgressBar();
+        } catch (IOException ex) {
+            view.showError("Error updating UI: " + ex.getMessage());
+        }
+    }
+
+    private void updateProgressBar() {
+        new Thread(() -> {
+            while (player.isPlaying() || player.isPaused()) {
+                long current = player.getCurrentPosition();
+                long total = player.getTotalDuration();
+                int progress = (int) ((float) current / total * 100);
+                SwingUtilities.invokeLater(() -> view.updateProgressBar(progress));
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }).start();
     }
 
     public void addSong(Song song) {
         library.addSong(song);
-        initializeSongList();  // Refresh the song list in the view
+        initializeSongList();
     }
 
     public void removeSong(Song song) {
         library.removeSong(song);
-        initializeSongList();  // Refresh the song list in the view
+        initializeSongList();
     }
 
     public void cleanup() {

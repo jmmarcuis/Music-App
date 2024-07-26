@@ -1,19 +1,16 @@
 package model;
 
-import persistence.SongEntity;
 import persistence.SongRepository;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class MusicLibrary {
-    private List<Song> songs;
+    private List<Song> songs = new ArrayList<>();
     private SongRepository repository;
 
     public MusicLibrary(SongRepository repository) {
         this.repository = repository;
-        this.songs = new ArrayList<>();
-        loadSongs();
+        loadSongs(); // Load songs from the repository
     }
 
     private void loadSongs() {
@@ -40,15 +37,6 @@ public class MusicLibrary {
                 .findFirst()
                 .orElse(null);
     }
-
-    private SongEntity convertToEntity(Song song) {
-        return new SongEntity(song.getTitle(), song.getArtist(), song.getFilePath(), song.getLyricsPath(), song.getImagePath());
-    }
-
-    private Song convertToSong(SongEntity entity) {
-        return new Song(entity.getId(), entity.getTitle(), entity.getArtist(), entity.getFilePath());
-    }
-
 
     public void close() {
         repository.close();

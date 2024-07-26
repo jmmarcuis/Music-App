@@ -1,9 +1,5 @@
 package persistence;
 
-
-import javax.persistence.*;
-import java.util.List;
-
 import model.Song;
 
 import javax.persistence.*;
@@ -23,7 +19,11 @@ public class SongRepository {
         try {
             tx.begin();
             SongEntity entity = convertToEntity(song);
-            em.persist(entity);
+            if (song.getId() == null) {
+                em.persist(entity);
+            } else {
+                em.merge(entity);
+            }
             tx.commit();
         } catch (Exception e) {
             if (tx != null && tx.isActive()) {
@@ -34,6 +34,7 @@ public class SongRepository {
             em.close();
         }
     }
+
 
     public Song getSongById(Long id) {
         EntityManager em = emf.createEntityManager();
@@ -95,7 +96,7 @@ public class SongRepository {
     }
 
     private Song convertToSong(SongEntity entity) {
-        return new Song(entity.getId(), entity.getTitle(), entity.getArtist(), entity.getFilePath());
+        return new Song(entity.getId(), entity.getTitle(), entity.getArtist(), entity.getFilePath(), entity.getLyricsPath(), entity.getImagePath());
     }
 
     private SongEntity convertToEntity(Song song) {
@@ -104,6 +105,8 @@ public class SongRepository {
         entity.setTitle(song.getTitle());
         entity.setArtist(song.getArtist());
         entity.setFilePath(song.getFilePath());
+        entity.setLyricsPath(song.getLyricsPath());
+        entity.setImagePath(song.getImagePath());
         return entity;
     }
 

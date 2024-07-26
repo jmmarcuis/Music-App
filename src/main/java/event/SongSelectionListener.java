@@ -14,14 +14,17 @@ public class SongSelectionListener implements ListSelectionListener {
 
     @Override
     public void valueChanged(ListSelectionEvent e) {
-        // Ensure the event isn't fired twice (once on press, once on release)
+        // Ensure the event isn't fired twice
         if (!e.getValueIsAdjusting()) {
             JList<String> list = (JList<String>) e.getSource();
             String selectedSong = list.getSelectedValue();
             if (selectedSong != null) {
-                // The controller will handle the actual song loading and playing
+                // Stop any currently playing song
+                controller.handleStopButton();
+                // Then handle the new song selection
                 controller.handleSongSelection(selectedSong);
             }
         }
     }
+
 }

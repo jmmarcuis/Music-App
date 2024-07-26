@@ -19,10 +19,15 @@ public class SongEntity {
     @Column(name = "file_path", nullable = false)
     private String filePath;
 
+    @Column(name = "lyrics_path")
+    private String lyricsPath;
+
+    @Column(name = "image_path")
+    private String imagePath;
+
     // Constructors, getters, and setters
 
     public SongEntity() {}
-
 
 
     public SongEntity(String title, String artist, String filePath, String lyricsPath, String imagePath) {
@@ -45,6 +50,7 @@ public class SongEntity {
 
     public String getFilePath() { return filePath; }
     public void setFilePath(String filePath) { this.filePath = filePath; }
+
 
     public String getLyricsPath() { return lyricsPath; }
     public void setLyricsPath(String lyricsPath) { this.lyricsPath = lyricsPath; }
