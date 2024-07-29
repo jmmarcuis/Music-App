@@ -1,6 +1,8 @@
 package view;
 
+import controller.SongCRUDController;
 import model.Song;
+import model.SongManager;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -13,6 +15,7 @@ import java.io.InputStream;
 import java.util.List;
 
 public class MusicPlayerView extends JFrame {
+    private SongCRUDController crudController;
     private JList<String> songList;
     private JTextArea lyricsArea;
     private JButton playButton, pauseButton, stopButton;
@@ -21,6 +24,7 @@ public class MusicPlayerView extends JFrame {
     private JLabel imageLabel;
     private JLabel nowPlayingLabel;
     private JProgressBar progressBar;
+    private SongManager songManager;
 
     public MusicPlayerView() {
         setTitle("Modern Music Player");
@@ -28,6 +32,8 @@ public class MusicPlayerView extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
         getContentPane().setBackground(new Color(18, 18, 18));
+
+        this.songManager = new SongManager();
 
         // Left panel (Song list and CRUD buttons)
         JPanel leftPanel = createLeftPanel();
@@ -49,6 +55,17 @@ public class MusicPlayerView extends JFrame {
         add(nowPlayingLabel, BorderLayout.NORTH);
     }
 
+    public int getSelectedSongIndex() {
+        return songList.getSelectedIndex();
+    }
+
+    public String getSelectedSongTitle() {
+        int selectedIndex = songList.getSelectedIndex();
+        if (selectedIndex != -1) {
+            return songList.getModel().getElementAt(selectedIndex);
+        }
+        return null;
+    }
     private JPanel createLeftPanel() {
         JPanel leftPanel = new JPanel(new BorderLayout(0, 10));
         leftPanel.setBackground(new Color(24, 24, 24));
@@ -70,10 +87,14 @@ public class MusicPlayerView extends JFrame {
         crudButtonPanel.add(editButton);
         crudButtonPanel.add(deleteButton);
 
+
         leftPanel.add(songScrollPane, BorderLayout.CENTER);
         leftPanel.add(crudButtonPanel, BorderLayout.SOUTH);
 
         return leftPanel;
+
+
+
     }
 
     private JPanel createCenterPanel() {
@@ -145,13 +166,27 @@ public class MusicPlayerView extends JFrame {
         button.setPreferredSize(new Dimension(50, 50));
         button.setBackground(new Color(30, 215, 96));
         button.setForeground(Color.BLACK);
-
         button.setFocusPainted(false);
         button.setBorderPainted(false);
         button.setContentAreaFilled(false);
         button.setOpaque(true);
         return button;
     }
+
+
+    public void setAddButtonListener(ActionListener listener) {
+        addButton.addActionListener(listener);
+    }
+
+    public void setEditButtonListener(ActionListener listener) {
+        editButton.addActionListener(listener);
+    }
+
+    public void setDeleteButtonListener(ActionListener listener) {
+        deleteButton.addActionListener(listener);
+    }
+
+
 
     public void updateSongList(List<Song> songs) {
         SwingUtilities.invokeLater(() -> {
@@ -185,7 +220,6 @@ public class MusicPlayerView extends JFrame {
         SwingUtilities.invokeLater(() -> {
             if (imagePath != null && !imagePath.isEmpty()) {
                 try {
-                    // Use class loader to get the resource as a stream
                     InputStream imageStream = getClass().getResourceAsStream("/image/" + imagePath);
                     if (imageStream != null) {
                         BufferedImage img = ImageIO.read(imageStream);
@@ -231,12 +265,7 @@ public class MusicPlayerView extends JFrame {
         volumeSlider.setValue(volume);
     }
 
-
     public void showError(String message) {
         SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE));
     }
-
-
-
-
 }

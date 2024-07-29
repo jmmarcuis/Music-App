@@ -57,6 +57,9 @@ public class SongRepository {
         }
     }
 
+    private Song convertToSong(SongEntity entity) {
+        return new Song(entity.getId(), entity.getTitle(), entity.getArtist(), entity.getFilePath(), entity.getLyricsPath(), entity.getImagePath());
+    }
     public void updateSong(Song song) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -95,9 +98,7 @@ public class SongRepository {
         }
     }
 
-    private Song convertToSong(SongEntity entity) {
-        return new Song(entity.getId(), entity.getTitle(), entity.getArtist(), entity.getFilePath(), entity.getLyricsPath(), entity.getImagePath());
-    }
+
 
     private SongEntity convertToEntity(Song song) {
         SongEntity entity = new SongEntity();
