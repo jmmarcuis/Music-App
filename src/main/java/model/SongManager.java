@@ -15,7 +15,7 @@ public class SongManager {
     private SongRepository songRepository;
     private static final Logger LOGGER = Logger.getLogger(SongManager.class.getName());
 
-    private static final String MUSIC_DIRECTORY = "src/main/resources/music";
+    private static final String MUSIC_DIRECTORY = "src/main/resources/music/";
     private static final String IMAGE_DIRECTORY = "src/main/resources/image/";
     private static final String LYRICS_DIRECTORY = "src/main/resources/lyrics/";
 
